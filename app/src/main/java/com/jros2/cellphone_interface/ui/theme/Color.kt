@@ -27,6 +27,7 @@ val MicrophoneColor = Color(0xFF56D4DD)// Cyan
 val BiometricColor = Color(0xFF8BD17C) // Green
 val TouchColor = Color(0xFFFFB86A) // Orange
 val CameraColor = Color(0xFF9AA5FF) // Indigo
+val SpeakerColor = Color(0xFFFF7B72) // Coral red for speaker
 
 // Text
 val TextPrimary = Color(0xFFE6EDF3)

@@ -35,7 +35,8 @@ class SensorBridge(private val context: Context) {
         MicrophoneSensor(),
         BiometricAuthSensor(),
         TouchScreenSensor(),
-        DualCameraSensor()
+        DualCameraSensor(),
+        SpeakerSensor()
     )
 
     private val _isRunning = MutableStateFlow(false)
