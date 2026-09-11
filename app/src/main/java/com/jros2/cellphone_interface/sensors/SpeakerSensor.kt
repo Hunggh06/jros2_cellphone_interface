@@ -71,7 +71,7 @@ class SpeakerSensor : PhoneSensor {
                 ROS2Topic(topicName, RosString::class.java)
             ) { reader ->
                 val raw: String = try {
-                    reader.read().data
+                    reader.read().dataAsString
                 } catch (e: Exception) {
                     Log.w(TAG, "read failed: ${e.message}")
                     return@createSubscription
