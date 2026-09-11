@@ -78,7 +78,7 @@ dependencies {
     implementation("androidx.biometric:biometric:1.1.0")
     implementation("us.ihmc:log-tools:0.6.5")
 
-    implementation("us.ihmc:jros2-android:1.1.6")
+    implementation("us.ihmc:jros2-android:1.1.7") // UTF-8 CDR string fix in CDRBuffer
     implementation("org.bytedeco:javacpp:1.5.11:android-arm64")
     implementation("org.bytedeco:javacpp:1.5.11:android-x86_64")
 
