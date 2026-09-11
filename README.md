@@ -30,6 +30,7 @@ At the message layer, this app also depends on [mobile_sensor_msgs](https://gith
 
 - Initializes a fully compliant ROS 2 Node (`phone_sensor_node`) directly on your physical Android smartphone.
 - Streams real-time, high-frequency telemetry from **11+ hardware/software sensors and input devices** on the phone to external ROS 2 environments.
+- Receives `std_msgs/String` announcements from ROS 2 and speaks them out loud on the phone speaker via Android Text-to-Speech (`/phone/speaker/say` → `SpeakerSensor.kt`).
 - Features a premium, reactive, dark-themed sensor dashboard UI using Jetpack Compose.
 - Employs an Android multicast Wi-Fi lock to ensure robust, real-time discovery of DDS participants.
 
@@ -85,9 +86,13 @@ The following table documents each supported sensor, its default topic name, its
 | **GPS Fix** | `/phone/gps` | `sensor_msgs/NavSatFix` | 1 Hz | `GpsSensor.kt` |
 | **Proximity** | `/phone/proximity` | `std_msgs/Float32` | 5 Hz | `ProximitySensor.kt` |
 | **Battery State** | `/phone/battery` | `sensor_msgs/BatteryState` | 0.2 Hz | `BatterySensor.kt` |
-| **Touch Screen** | `/phone/touch` | `mobile_sensor_msgs/TouchArray` | 30 Hz | `TouchSensor.kt` |
-| **Biometric Auth** | `/phone/biometric` | `mobile_sensor_msgs/BiometricAuth` | Event-driven | `BiometricSensor.kt` |
+| **Touch Screen** | `/phone/touch` | `mobile_sensor_msgs/TouchArray` | 30 Hz | `TouchScreenSensor.kt` |
+| **Biometric Auth** | `/phone/biometric` | `mobile_sensor_msgs/BiometricAuth` | Event-driven | `BiometricAuthSensor.kt` |
 | **Camera** | `/phone/camera/front/image` and `/phone/camera/back/image` | `sensor_msgs/Image` | Streaming | `DualCameraSensor.kt` |
+| **Microphone** | `/phone/audio` | `audio_common_msgs/AudioData` | Streaming (16 kHz mono PCM16) | `MicrophoneSensor.kt` |
+| **Speaker 🔊 (subscriber)** | `/phone/speaker/say` | `std_msgs/String` | Event-driven (subscribe → TTS) | `SpeakerSensor.kt` |
+
+> **Note:** every row above publishes phone data to ROS 2 **except Speaker**, which works in the opposite direction: it subscribes to `/phone/speaker/say` and speaks each received text on the phone speaker (Vietnamese TTS with English fallback). Toggling its dashboard card off mutes it.
 
 The camera bridge supports front, back, or dual streaming depending on the device and the selected camera mode. Related runtime settings include camera mode, rotation, color, and resolution.
 
@@ -204,9 +209,11 @@ jros2_cellphone_interface/
 │   │   │       ├── GpsSensor.kt        # Location coordinate calculations
 │   │   │       ├── ProximitySensor.kt  # Proximity threshold alerts
 │   │   │       ├── BatterySensor.kt    # Polling updates for battery charge & voltage
+│   │   │       ├── MicrophoneSensor.kt # 16 kHz mono PCM16 streaming as audio_common_msgs/AudioData
+│   │   │       ├── SpeakerSensor.kt    # Subscribes std_msgs/String, speaks via Android TTS
 │   │   │       ├── DualCameraSensor.kt # Front/back camera streaming as sensor_msgs/Image
-│   │   │       ├── TouchSensor.kt      # Multi-touch screen input events
-│   │   │       └── BiometricSensor.kt  # Biometric authentication state & callbacks
+│   │   │       ├── TouchScreenSensor.kt # Multi-touch screen input events
+│   │   │       └── BiometricAuthSensor.kt # Biometric authentication state & callbacks
 │   │   └── AndroidManifest.xml         # Hardware uses-permissions specifications
 │   └── build.gradle.kts                # Application dependencies config
 ├── build.gradle.kts
@@ -322,6 +329,9 @@ ros2 topic hz /phone/imu
 
 # Inspect GPS status
 ros2 topic echo /phone/gps
+
+# Make the phone speak (Speaker card must be toggled on)
+ros2 topic pub /phone/speaker/say std_msgs/String "data: bạn đã đi vào vùng nguy hiểm"
 ```
 
 As a follow-up companion experiment, [mobile_to_joy](https://github.com/SinfonIAUniandes/mobile_to_joy) was developed as a proof of concept to transform phone tactile interactions into controller-like ROS 2 input.
