@@ -24,7 +24,7 @@ class ImuSensor : PhoneSensor {
     override val enabled = MutableStateFlow(true)
     private val _count = MutableStateFlow(0L)
     override val messageCount: StateFlow<Long> = _count
-    private val _value = MutableStateFlow("ax=0.0 ay=0.0 az=0.0")
+    private val _value = MutableStateFlow("ax=0.0 ay=0.0 az=0.0\ngx=0.0 gy=0.0 gz=0.0")
     override val displayValue: StateFlow<String> = _value
 
     private val msg = Imu()
@@ -84,7 +84,7 @@ class ImuSensor : PhoneSensor {
         msg.linearAcceleration.z = accel[2].toDouble()
         publisher?.publish(msg)
         _count.value++
-        _value.value = "ax=%.1f ay=%.1f az=%.1f".format(accel[0], accel[1], accel[2])
+        _value.value = "ax=%.1f ay=%.1f az=%.1f\ngx=%.2f gy=%.2f gz=%.2f".format(accel[0], accel[1], accel[2], gyro[0], gyro[1], gyro[2])
     }
 
     override fun start(node: ROS2Node, context: Context) {
