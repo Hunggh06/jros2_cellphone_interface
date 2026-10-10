@@ -24,6 +24,9 @@ import us.ihmc.jros2.ROS2Publisher
 import us.ihmc.jros2.ROS2Topic
 
 class DualCameraSensor : PhoneSensor {
+    companion object {
+        private const val TAG = "DualCameraSensor"
+    }
     override val id = "camera_dual"
     override val name = "Camera"
     override val icon = "📷"
@@ -63,7 +66,11 @@ class DualCameraSensor : PhoneSensor {
 
         val manager = context.getSystemService(Context.CAMERA_SERVICE) as CameraManager
         val frontId = findCamera(manager, CameraCharacteristics.LENS_FACING_FRONT)
-        val backId = findCamera(manager, CameraCharacteristics.LENS_FACING_BACK)
+        val rearCameras = CameraSelection.discoverRearCameras(manager)
+        val backId = when (mode) {
+            "back_ultrawide" -> rearCameras.ultrawideId ?: rearCameras.normalId
+            else -> rearCameras.normalId
+        }
         if (frontId == null && backId == null) {
             _value.value = "No cameras found"
             return
@@ -119,11 +126,14 @@ class DualCameraSensor : PhoneSensor {
             "high" -> 1280 to 720
             else -> 640 to 480 // "med"
         }
+        val backZoomRatio = if (mode == "back_ultrawide") rearCameras.ultrawideZoomRatio else null
 
         frontStream = if (openFront && frontId != null) openStream(context, manager, frontId, true, colorMode, rotation, streamW, streamH) else null
-        backStream = if (openBack && backId != null) openStream(context, manager, backId, false, colorMode, rotation, streamW, streamH) else null
+        backStream = if (openBack && backId != null) openStream(context, manager, backId, false, colorMode, rotation, streamW, streamH, backZoomRatio) else null
 
+        val usingUltrawide = mode == "back_ultrawide" && backId == rearCameras.ultrawideId
         _value.value = when {
+            usingUltrawide && openBack -> "Streaming back (0.6x)"
             openFront && openBack -> "Streaming front+back"
             openFront -> "Streaming front"
             mode == "dual" && !supportsConcurrent -> "Streaming back (dual unsupported)"
@@ -177,7 +187,8 @@ class DualCameraSensor : PhoneSensor {
         colorMode: Boolean,
         rotation: Int,
         width: Int,
-        height: Int
+        height: Int,
+        zoomRatio: Float? = null
     ): CameraStream {
         val handler = cameraHandler ?: error("Camera handler not initialized")
         val reader = ImageReader.newInstance(width, height, ImageFormat.YUV_420_888, 2)
@@ -199,6 +210,7 @@ class DualCameraSensor : PhoneSensor {
                 val requestBuilder = camera.createCaptureRequest(CameraDevice.TEMPLATE_RECORD).apply {
                     addTarget(reader.surface)
                     set(CaptureRequest.CONTROL_AF_MODE, CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_VIDEO)
+                    zoomRatio?.let { set(CaptureRequest.CONTROL_ZOOM_RATIO, it) }
                 }
 
                 camera.createCaptureSession(listOf(reader.surface), object : CameraCaptureSession.StateCallback() {
