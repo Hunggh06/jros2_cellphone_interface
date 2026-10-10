@@ -89,7 +89,7 @@ The following table documents each supported sensor, its default topic name, its
 | **Touch Screen** | `/phone/touch` | `mobile_sensor_msgs/TouchArray` | 30 Hz | `TouchScreenSensor.kt` |
 | **Biometric Auth** | `/phone/biometric` | `mobile_sensor_msgs/BiometricAuth` | Event-driven | `BiometricAuthSensor.kt` |
 | **Camera** | `/phone/camera/front/image` and `/phone/camera/back/image` | `sensor_msgs/Image` | Streaming | `DualCameraSensor.kt` |
-| **Microphone** | `/phone/audio` | `audio_common_msgs/AudioData` | Streaming (16 kHz mono PCM16) | `MicrophoneSensor.kt` |
+| **Speech Text** | `/phone/speech_text` | `std_msgs/String` | Event-driven (per VAD utterance) | `SpeechTextSensor.kt` |
 | **Speaker 🔊 (subscriber)** | `/phone/speaker/say` | `std_msgs/String` | Event-driven (subscribe → TTS) | `SpeakerSensor.kt` |
 
 > **Note:** every row above publishes phone data to ROS 2 **except Speaker**, which works in the opposite direction: it subscribes to `/phone/speaker/say` and speaks each received text on the phone speaker (Vietnamese TTS with English fallback). Toggling its dashboard card off mutes it.
@@ -209,7 +209,7 @@ jros2_cellphone_interface/
 │   │   │       ├── GpsSensor.kt        # Location coordinate calculations
 │   │   │       ├── ProximitySensor.kt  # Proximity threshold alerts
 │   │   │       ├── BatterySensor.kt    # Polling updates for battery charge & voltage
-│   │   │       ├── MicrophoneSensor.kt # 16 kHz mono PCM16 streaming as audio_common_msgs/AudioData
+│   │   │       ├── SpeechTextSensor.kt # On-device VI STT (sherpa-onnx) as std_msgs/String
 │   │   │       ├── SpeakerSensor.kt    # Subscribes std_msgs/String, speaks via Android TTS
 │   │   │       ├── DualCameraSensor.kt # Front/back camera streaming as sensor_msgs/Image
 │   │   │       ├── TouchScreenSensor.kt # Multi-touch screen input events

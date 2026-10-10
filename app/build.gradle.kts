@@ -79,6 +79,7 @@ dependencies {
     implementation("us.ihmc:log-tools:0.6.5")
 
     implementation("us.ihmc:jros2-android:1.1.7") // UTF-8 CDR string fix in CDRBuffer
+    implementation("com.github.k2-fsa.sherpa-onnx:sherpa-onnx:v1.13.8")
     implementation("org.bytedeco:javacpp:1.5.11:android-arm64")
     implementation("org.bytedeco:javacpp:1.5.11:android-x86_64")
 

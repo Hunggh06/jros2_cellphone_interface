@@ -32,7 +32,7 @@ class SensorBridge(private val context: Context) {
         GpsSensor(),
         ProximitySensor(),
         BatterySensor(),
-        MicrophoneSensor(),
+        SpeechTextSensor(),
         BiometricAuthSensor(),
         TouchScreenSensor(),
         DualCameraSensor(),
