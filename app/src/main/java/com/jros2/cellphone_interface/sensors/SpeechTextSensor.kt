@@ -219,8 +219,9 @@ class SpeechTextSensor : PhoneSensor {
 
     private fun publishText(text: String) {
         try {
-            val msg = RosString()
-            msg.setData(text)
+            // Utf8String (not RosString): works around jros2-android 1.1.7
+            // truncating non-ASCII text due to char-based size calculation.
+            val msg = Utf8String(text)
             publisher?.publish(msg)
             _count.value++
             _value.value = if (text.length > 40) text.take(40) + "…" else text
