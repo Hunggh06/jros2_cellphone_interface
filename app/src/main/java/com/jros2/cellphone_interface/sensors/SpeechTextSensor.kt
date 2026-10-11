@@ -129,9 +129,9 @@ class SpeechTextSensor : PhoneSensor {
         val config = VadModelConfig(
             sileroVadModelConfig = SileroVadModelConfig(
                 model = java.io.File(dir, "silero_vad.onnx").absolutePath,
-                threshold = 0.5f,
-                minSilenceDuration = 0.5f,
-                minSpeechDuration = 0.25f,
+                threshold = 0.35f,
+                minSilenceDuration = 0.8f,
+                minSpeechDuration = 0.3f,
                 windowSize = 512
             ),
             sampleRate = sampleRateHz,
@@ -185,6 +185,8 @@ class SpeechTextSensor : PhoneSensor {
                     while (!v.empty()) {
                         val segment = v.front()
                         v.pop()
+                        // Skip tiny fragments (<0.4s): not enough context, decode garbage
+                        if (segment.samples.size < (sampleRateHz * 0.4).toInt()) continue
                         val text = decodeUtterance(segment.samples)
                         if (text.isNotBlank()) publishText(text)
                     }
