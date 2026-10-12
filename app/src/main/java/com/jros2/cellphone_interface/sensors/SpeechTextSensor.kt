@@ -149,8 +149,10 @@ class SpeechTextSensor : PhoneSensor {
             _value.value = "Audio init error"
             return
         }
+        // VOICE_COMMUNICATION routes mic through hardware echo cancellation
+        // so the STT does not pick up the phone's own speaker output.
         val recorder = AudioRecord(
-            MediaRecorder.AudioSource.MIC,
+            MediaRecorder.AudioSource.VOICE_COMMUNICATION,
             sampleRateHz,
             AudioFormat.CHANNEL_IN_MONO,
             AudioFormat.ENCODING_PCM_16BIT,
@@ -171,6 +173,16 @@ class SpeechTextSensor : PhoneSensor {
             while (isActive) {
                 if (!enabled.value) {
                     delay(50)
+                    continue
+                }
+                // Half-duplex: drop mic input while TTS is speaking so its
+                // buffered audio can never leak into the next utterance.
+                if (SpeakGuard.isMuted()) {
+                    try {
+                        vad?.reset()
+                    } catch (_: Exception) {
+                    }
+                    delay(100)
                     continue
                 }
                 val n = recorder.read(shortBuf, 0, shortBuf.size)

@@ -48,9 +48,12 @@ class SpeakerSensor : PhoneSensor {
                 }
                 tts?.setOnUtteranceProgressListener(object : UtteranceProgressListener() {
                     override fun onStart(utteranceId: String?) {}
-                    override fun onDone(utteranceId: String?) {}
+                    override fun onDone(utteranceId: String?) {
+                        SpeakGuard.setSpeaking(false)
+                    }
                     override fun onError(utteranceId: String?) {
                         Log.w(TAG, "TTS error: $utteranceId")
+                        SpeakGuard.setSpeaking(false)
                     }
                 })
                 ttsReady = true
@@ -103,6 +106,7 @@ class SpeakerSensor : PhoneSensor {
     private fun speakNow(text: String) {
         try {
             val id = "spk-${System.currentTimeMillis()}"
+            SpeakGuard.setSpeaking(true)
             tts?.speak(text, TextToSpeech.QUEUE_ADD, null, id)
             _count.value++
             _value.value = if (text.length > 40) text.take(40) + "…" else text
